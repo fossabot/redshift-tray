@@ -30,7 +30,7 @@ namespace redshift_tray
 
     private static Redshift Instance;
 
-    private Process RedshiftProcess;
+    private readonly Process RedshiftProcess;
 
     public delegate void RedshiftQuitHandler(object sender, RedshiftQuitArgs e);
     public event RedshiftQuitHandler OnRedshiftQuit;
@@ -47,24 +47,23 @@ namespace redshift_tray
       }
     }
 
-    public bool isRunning
-    {
-      get { return !RedshiftProcess.HasExited; }
-    }
+    public bool isRunning => !RedshiftProcess.HasExited;
 
     public static string[] GetArgsBySettings(bool useDummyMethod)
     {
       Settings settings = Settings.Default;
-      List<string> returnValue = new List<string>();
+      List<string> returnValue = new List<string>
+      {
+        $"-m {(useDummyMethod ? METHOD_DUMMY : METHOD_WINGDI)}",
+        $"-l {settings.RedshiftLatitude.ToString().Replace(',', '.')}:{settings.RedshiftLongitude.ToString().Replace(',', '.')}",
+        $"-t {settings.RedshiftTemperatureDay}:{settings.RedshiftTemperatureNight}"
+      };
 
       //Method
-      returnValue.Add(string.Format("-m {0}", useDummyMethod ? METHOD_DUMMY : METHOD_WINGDI));
 
       //Location
-      returnValue.Add(string.Format("-l {0}:{1}", settings.RedshiftLatitude.ToString().Replace(',', '.'), settings.RedshiftLongitude.ToString().Replace(',', '.')));
 
       //Temperature
-      returnValue.Add(string.Format("-t {0}:{1}", settings.RedshiftTemperatureDay, settings.RedshiftTemperatureNight));
 
       //Transition
       if(!settings.RedshiftTransition)
@@ -73,10 +72,10 @@ namespace redshift_tray
       }
 
       //Brightness
-      returnValue.Add(string.Format("-b {0}:{1}", settings.RedshiftBrightnessDay.ToString().Replace(',', '.'), settings.RedshiftBrightnessNight.ToString().Replace(',', '.')));
+      returnValue.Add($"-b {settings.RedshiftBrightnessDay.ToString().Replace(',', '.')}:{settings.RedshiftBrightnessNight.ToString().Replace(',', '.')}");
 
       //Gamma Correction
-      returnValue.Add(string.Format("-g {0}:{1}:{2}", settings.RedshiftGammaRed.ToString().Replace(',', '.'), settings.RedshiftGammaGreen.ToString().Replace(',', '.'), settings.RedshiftGammaBlue.ToString().Replace(',', '.')));
+      returnValue.Add($"-g {settings.RedshiftGammaRed.ToString().Replace(',', '.')}:{settings.RedshiftGammaGreen.ToString().Replace(',', '.')}:{settings.RedshiftGammaBlue.ToString().Replace(',', '.')}");
 
       return returnValue.ToArray();
     }
@@ -105,7 +104,7 @@ namespace redshift_tray
         return ExecutableError.WrongApplication;
       }
 
-      Main.WriteLogMessage(string.Format("Checking redshift version >= {0}.{1}", MIN_REDSHIFT_VERSION[0], MIN_REDSHIFT_VERSION[1]), DebugConsole.LogType.Info);
+      Main.WriteLogMessage($"Checking redshift version >= {MIN_REDSHIFT_VERSION[0]}.{MIN_REDSHIFT_VERSION[1]}", DebugConsole.LogType.Info);
 
       if(!CheckExecutableVersion(version[1]))
       {
@@ -142,17 +141,15 @@ namespace redshift_tray
       Main.WriteLogMessage("Looking for running redshift instances.", DebugConsole.LogType.Info);
       foreach(Process redshift in Process.GetProcessesByName("redshift"))
       {
-        if(!redshift.HasExited)
+        if (redshift.HasExited) continue;
+        try
         {
-          try
-          {
-            redshift.Kill();
-            Main.WriteLogMessage("Killed previous redshift process.", DebugConsole.LogType.Info);
-          }
-          catch
-          {
-            Main.WriteLogMessage("Was not able to kill redshift process.", DebugConsole.LogType.Error);
-          }
+          redshift.Kill();
+          Main.WriteLogMessage("Killed previous redshift process.", DebugConsole.LogType.Info);
+        }
+        catch
+        {
+          Main.WriteLogMessage("Was not able to kill redshift process.", DebugConsole.LogType.Error);
         }
       }
     }
@@ -201,16 +198,21 @@ namespace redshift_tray
     {
       string arglist = string.Join(" ", Args);
 
-      Main.WriteLogMessage(string.Format("Starting redshift with args '{0}'", arglist), DebugConsole.LogType.Info);
+      Main.WriteLogMessage($"Starting redshift with args '{arglist}'", DebugConsole.LogType.Info);
 
-      RedshiftProcess = new Process();
-      RedshiftProcess.StartInfo.FileName = path;
-      RedshiftProcess.StartInfo.Arguments = arglist;
-      RedshiftProcess.StartInfo.UseShellExecute = false;
-      RedshiftProcess.StartInfo.CreateNoWindow = true;
-      RedshiftProcess.StartInfo.RedirectStandardOutput = true;
-      RedshiftProcess.StartInfo.RedirectStandardError = true;
-      RedshiftProcess.EnableRaisingEvents = true;
+      RedshiftProcess = new Process
+      {
+        StartInfo =
+        {
+          FileName = path,
+          Arguments = arglist,
+          UseShellExecute = false,
+          CreateNoWindow = true,
+          RedirectStandardOutput = true,
+          RedirectStandardError = true
+        },
+        EnableRaisingEvents = true
+      };
       RedshiftProcess.Exited += RedshiftProcess_Crashed;
     }
 

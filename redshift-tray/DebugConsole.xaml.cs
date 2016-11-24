@@ -19,7 +19,7 @@ namespace redshift_tray
 {
   public partial class DebugConsole : Window
   {
-    private bool isShown = false;
+    private bool isShown;
 
     public DebugConsole()
     {
@@ -31,16 +31,16 @@ namespace redshift_tray
     {
       Settings settings = Settings.Default;
 
-      if(this.WindowState == WindowState.Maximized)
+      if(WindowState == WindowState.Maximized)
       {
-        settings.DebugConsoleWindowState = this.WindowState;
+        settings.DebugConsoleWindowState = WindowState;
       }
       else
       {
-        settings.DebugConsoleLeft = this.Left;
-        settings.DebugConsoleTop = this.Top;
-        settings.DebugConsoleWidth = this.Width;
-        settings.DebugConsoleHeight = this.Height;
+        settings.DebugConsoleLeft = Left;
+        settings.DebugConsoleTop = Top;
+        settings.DebugConsoleWidth = Width;
+        settings.DebugConsoleHeight = Height;
       }
       settings.Save();
     }
@@ -49,30 +49,30 @@ namespace redshift_tray
     {
       Settings settings = Settings.Default;
 
-      if(Common.isOutOfBounds(settings.DebugConsoleLeft, settings.DebugConsoleTop))
+      if(Common.IsOutOfBounds(settings.DebugConsoleLeft, settings.DebugConsoleTop))
       {
         return;
       }
 
-      this.WindowStartupLocation = WindowStartupLocation.Manual;
+      WindowStartupLocation = WindowStartupLocation.Manual;
 
       if(settings.DebugConsoleWindowState == WindowState.Maximized)
       {
-        this.WindowState = settings.DebugConsoleWindowState;
+        WindowState = settings.DebugConsoleWindowState;
         return;
       }
 
-      this.Left = settings.DebugConsoleLeft;
-      this.Top = settings.DebugConsoleTop;
-      this.Width = settings.DebugConsoleWidth;
-      this.Height = settings.DebugConsoleHeight;
+      Left = settings.DebugConsoleLeft;
+      Top = settings.DebugConsoleTop;
+      Width = settings.DebugConsoleWidth;
+      Height = settings.DebugConsoleHeight;
     }
 
     public void ShowOrUnhide()
     {
       if(isShown)
       {
-        Visibility = System.Windows.Visibility.Visible;
+        Visibility = Visibility.Visible;
       }
       else
       {
@@ -83,7 +83,7 @@ namespace redshift_tray
 
     public new void Hide()
     {
-      Visibility = System.Windows.Visibility.Hidden;
+      Visibility = Visibility.Hidden;
     }
 
     private void ButtonClipboard_Click(object sender, RoutedEventArgs e)
@@ -112,7 +112,7 @@ namespace redshift_tray
 
       Output.Dispatcher.Invoke(() =>
       {
-        string log = string.Format("{0} {1}: {2}", DateTime.Now.ToString("HH:mm:ss"), logType.ToString(), message);
+        string log = $"{DateTime.Now:HH:mm:ss} {logType}: {message}";
         Output.Text += log + Environment.NewLine;
       });
     }

@@ -28,15 +28,14 @@ namespace redshift_tray
   public partial class SettingsWindow : Window
   {
 
-    private Redshift.ExecutableError _ExecutableErrorState;
+    private Redshift.ExecutableError _executableErrorState;
 
     private Redshift.ExecutableError ExecutableErrorState
     {
-      get { return _ExecutableErrorState; }
       set
       {
-        _ExecutableErrorState = value;
-        switch(value)
+        _executableErrorState = value;
+        switch (value)
         {
           case Redshift.ExecutableError.MissingPath:
             Run run;
@@ -47,8 +46,7 @@ namespace redshift_tray
             RedshiftInfo.Inlines.Add(run);
 
             run = new Run("here on Github");
-            Hyperlink github = new Hyperlink(run);
-            github.NavigateUri = new System.Uri(Main.RELEASES_PAGE);
+            Hyperlink github = new Hyperlink(run) { NavigateUri = new System.Uri(Main.RELEASES_PAGE) };
             github.RequestNavigate += Hyperlink_RequestNavigate;
             RedshiftInfo.Inlines.Add(github);
 
@@ -97,8 +95,8 @@ namespace redshift_tray
     {
       Settings settings = Settings.Default;
 
-      settings.SettingsWindowLeft = this.Left;
-      settings.SettingsWindowTop = this.Top;
+      settings.SettingsWindowLeft = Left;
+      settings.SettingsWindowTop = Top;
 
       settings.Save();
     }
@@ -107,14 +105,14 @@ namespace redshift_tray
     {
       Settings settings = Settings.Default;
 
-      if(Common.isOutOfBounds(settings.SettingsWindowLeft, settings.SettingsWindowTop))
+      if (Common.IsOutOfBounds(settings.SettingsWindowLeft, settings.SettingsWindowTop))
       {
         return;
       }
 
-      this.WindowStartupLocation = System.Windows.WindowStartupLocation.Manual;
-      this.Left = settings.SettingsWindowLeft;
-      this.Top = settings.SettingsWindowTop;
+      WindowStartupLocation = System.Windows.WindowStartupLocation.Manual;
+      Left = settings.SettingsWindowLeft;
+      Top = settings.SettingsWindowTop;
     }
 
     private void SaveConfig()
@@ -132,7 +130,7 @@ namespace redshift_tray
 
     private bool CheckConfig()
     {
-      return (_ExecutableErrorState == Redshift.ExecutableError.Ok);
+      return (_executableErrorState == Redshift.ExecutableError.Ok);
     }
 
     private void ImportConfig(string file)
@@ -145,40 +143,40 @@ namespace redshift_tray
         select s.Split('=')
         ).Select(s => new { key = s[0], value = s[1].Split(';')[0] });
 
-      foreach(var item in items)
+      foreach (var item in items)
       {
-        switch(item.key)
+        switch (item.key)
         {
           case "lat":
             decimal latitude;
 
-            if(decimal.TryParse(item.value, System.Globalization.NumberStyles.Float, new CultureInfo("en-US"), out latitude))
+            if (decimal.TryParse(item.value, NumberStyles.Float, new CultureInfo("en-US"), out latitude))
             {
-              Latitude.Value = (decimal)latitude;
+              Latitude.Value = latitude;
             }
             break;
           case "lon":
             decimal longitude;
 
-            if(decimal.TryParse(item.value, System.Globalization.NumberStyles.Float, new CultureInfo("en-US"), out longitude))
+            if (decimal.TryParse(item.value, NumberStyles.Float, new CultureInfo("en-US"), out longitude))
             {
-              Longitude.Value = (decimal)longitude;
+              Longitude.Value = longitude;
             }
             break;
           case "temp-day":
             int tempDay;
 
-            if(int.TryParse(item.value, System.Globalization.NumberStyles.Float, new CultureInfo("en-US"), out tempDay))
+            if (int.TryParse(item.value, NumberStyles.Float, new CultureInfo("en-US"), out tempDay))
             {
-              TemperatureDay.Value = (int)tempDay;
+              TemperatureDay.Value = tempDay;
             }
             break;
           case "temp-night":
             int tempNight;
 
-            if(int.TryParse(item.value, System.Globalization.NumberStyles.Float, new CultureInfo("en-US"), out tempNight))
+            if (int.TryParse(item.value, NumberStyles.Float, new CultureInfo("en-US"), out tempNight))
             {
-              TemperatureNight.Value = (int)tempNight;
+              TemperatureNight.Value = tempNight;
             }
             break;
           case "transition":
@@ -187,47 +185,47 @@ namespace redshift_tray
           case "brightness":
             decimal brightness;
 
-            if(decimal.TryParse(item.value, System.Globalization.NumberStyles.Float, new CultureInfo("en-US"), out brightness))
+            if (decimal.TryParse(item.value, NumberStyles.Float, new CultureInfo("en-US"), out brightness))
             {
-              BrightnessDay.Value = (decimal)brightness;
-              BrightnessNight.Value = (decimal)brightness;
+              BrightnessDay.Value = brightness;
+              BrightnessNight.Value = brightness;
             }
             break;
           case "brightness-day":
             decimal brightnessDay;
 
-            if(decimal.TryParse(item.value, System.Globalization.NumberStyles.Float, new CultureInfo("en-US"), out brightnessDay))
+            if (decimal.TryParse(item.value, NumberStyles.Float, new CultureInfo("en-US"), out brightnessDay))
             {
-              BrightnessDay.Value = (decimal)brightnessDay;
+              BrightnessDay.Value = brightnessDay;
             }
             break;
           case "brightness-night":
             decimal brightnessNight;
 
-            if(decimal.TryParse(item.value, System.Globalization.NumberStyles.Float, new CultureInfo("en-US"), out brightnessNight))
+            if (decimal.TryParse(item.value, NumberStyles.Float, new CultureInfo("en-US"), out brightnessNight))
             {
-              BrightnessNight.Value = (decimal)brightnessNight;
+              BrightnessNight.Value = brightnessNight;
             }
             break;
           case "gamma":
           case "gamma-day":
             string[] gammaS = item.value.Split(':');
             decimal[] gammaD = new decimal[gammaS.Length];
-            for(int i = 0; i < gammaS.Length; i++)
+            for (int i = 0; i < gammaS.Length; i++)
             {
-              if(!decimal.TryParse(gammaS[i], System.Globalization.NumberStyles.Float, new CultureInfo("en-US"), out gammaD[i]))
+              if (!decimal.TryParse(gammaS[i], NumberStyles.Float, new CultureInfo("en-US"), out gammaD[i]))
               {
                 break;
               }
             }
 
-            if(gammaD.Length == 1)
+            if (gammaD.Length == 1)
             {
               GammaRed.Value = gammaD[0];
               GammaGreen.Value = gammaD[0];
               GammaBlue.Value = gammaD[0];
             }
-            else if(gammaD.Length == 3)
+            else if (gammaD.Length == 3)
             {
               GammaRed.Value = gammaD[0];
               GammaGreen.Value = gammaD[1];
@@ -256,17 +254,19 @@ namespace redshift_tray
 
     private void ButtonRedshift_Click(object sender, RoutedEventArgs e)
     {
-      OpenFileDialog openFileDialog = new OpenFileDialog();
-      openFileDialog.Title = "Redshift path";
-      openFileDialog.Filter = "Redshift|redshift.exe|All executables|*.exe";
-      openFileDialog.CheckFileExists = true;
+      OpenFileDialog openFileDialog = new OpenFileDialog
+      {
+        Title = "Redshift path",
+        Filter = "Redshift|redshift.exe|All executables|*.exe",
+        CheckFileExists = true
+      };
 
-      if(File.Exists(RedshiftPath.Text))
+      if (File.Exists(RedshiftPath.Text))
       {
         openFileDialog.InitialDirectory = Path.GetDirectoryName(RedshiftPath.Text);
       }
 
-      if((bool)openFileDialog.ShowDialog())
+      if ((bool)openFileDialog.ShowDialog())
       {
         Settings.Default.RedshiftAppPath = openFileDialog.FileName;
 
@@ -280,7 +280,7 @@ namespace redshift_tray
 
       AutoLocation autoLocation = Common.DetectLocation();
 
-      if(!autoLocation.Success)
+      if (!autoLocation.Success)
       {
         System.Windows.MessageBox.Show(autoLocation.Errortext, "Error while detecting location", MessageBoxButton.OK, MessageBoxImage.Error);
       }
@@ -295,12 +295,14 @@ namespace redshift_tray
 
     private void ImportButton_Click(object sender, RoutedEventArgs e)
     {
-      OpenFileDialog openFileDialog = new OpenFileDialog();
-      openFileDialog.Title = "Import redshift config";
-      openFileDialog.Filter = "redshift.conf|redshift.conf|All files|*.*";
-      openFileDialog.CheckFileExists = true;
+      OpenFileDialog openFileDialog = new OpenFileDialog
+      {
+        Title = "Import redshift config",
+        Filter = "redshift.conf|redshift.conf|All files|*.*",
+        CheckFileExists = true
+      };
 
-      if((bool)openFileDialog.ShowDialog())
+      if ((bool)openFileDialog.ShowDialog())
       {
         ImportConfig(openFileDialog.FileName);
       }
@@ -326,13 +328,13 @@ namespace redshift_tray
       value = value.Replace(',', '.');
 
       decimal parseValue;
-      if(decimal.TryParse(value, System.Globalization.NumberStyles.Float, new CultureInfo("en-US"), out parseValue))
+      if (decimal.TryParse(value, NumberStyles.Float, new CultureInfo("en-US"), out parseValue))
       {
-        if(parseValue > dSender.Maximum)
+        if (parseValue > dSender.Maximum)
         {
           dSender.Value = dSender.Maximum;
         }
-        else if(parseValue < dSender.Minimum)
+        else if (parseValue < dSender.Minimum)
         {
           dSender.Value = dSender.Minimum;
         }

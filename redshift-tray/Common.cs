@@ -13,19 +13,15 @@
 */
 using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace redshift_tray
 {
-
   static class Common
   {
 
@@ -38,13 +34,13 @@ namespace redshift_tray
       }
       set
       {
-        if(Autostart == value)
+        if (Autostart == value)
         {
           return;
         }
 
         RegistryKey regPath = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-        switch(value)
+        switch (value)
         {
           case true:
             regPath.SetValue("Redshift Tray", Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, System.AppDomain.CurrentDomain.FriendlyName));
@@ -64,29 +60,29 @@ namespace redshift_tray
 
       try
       {
-        Main.WriteLogMessage(string.Format("Pinging {0}", Main.GEO_API_DOMAIN), DebugConsole.LogType.Info);
+        Main.WriteLogMessage($"Pinging {Main.GEO_API_DOMAIN}", DebugConsole.LogType.Info);
 
         PingReply pingReply = new Ping().Send(Main.GEO_API_DOMAIN, 5000);
-        if(pingReply.Status != IPStatus.Success)
+        if (pingReply.Status != IPStatus.Success)
         {
           Main.WriteLogMessage("API is not reachable.", DebugConsole.LogType.Error);
           returnValue.Success = false;
-          returnValue.Errortext = string.Format("Location provider is not reachable.{0}Please make sure that your internet connection works properly and try again in a few minutes.", Environment.NewLine);
+          returnValue.Errortext = $"Location provider is not reachable.{Environment.NewLine}Please make sure that your internet connection works properly and try again in a few minutes.";
           return returnValue;
         }
-        if(IPAddress.IsLoopback(pingReply.Address) || pingReply.Address.Equals(IPAddress.Any))
+        if (IPAddress.IsLoopback(pingReply.Address) || pingReply.Address.Equals(IPAddress.Any))
         {
           Main.WriteLogMessage("API is routed to localhost.", DebugConsole.LogType.Error);
           returnValue.Success = false;
-          returnValue.Errortext = string.Format("The location provider is blocked by your proxy or hosts-file.{0}Please insert your location manually or allow connections to {1}.", Environment.NewLine, Main.GEO_API_DOMAIN);
+          returnValue.Errortext = $"The location provider is blocked by your proxy or hosts-file.{Environment.NewLine}Please insert your location manually or allow connections to {Main.GEO_API_DOMAIN}.";
           return returnValue;
         }
       }
-      catch(PingException)
+      catch (PingException)
       {
         Main.WriteLogMessage("API is not reachable.", DebugConsole.LogType.Error);
         returnValue.Success = false;
-        returnValue.Errortext = string.Format("Location provider is not reachable.{0}Please make sure that your internet connection works properly and try again in a few minutes.", Environment.NewLine);
+        returnValue.Errortext = $"Location provider is not reachable.{Environment.NewLine}Please make sure that your internet connection works properly and try again in a few minutes.";
         return returnValue;
       }
 
@@ -101,43 +97,40 @@ namespace redshift_tray
         request.Proxy = null;
 
         response = (HttpWebResponse)request.GetResponse();
-        if(response.StatusCode != HttpStatusCode.OK)
+        if (response.StatusCode != HttpStatusCode.OK)
         {
           Main.WriteLogMessage("A server side error occured.", DebugConsole.LogType.Error);
           returnValue.Success = false;
-          returnValue.Errortext = string.Format("An error on the server side of the location provider occured.{0}Please try again later.", Environment.NewLine);
+          returnValue.Errortext =
+            $"An error on the server side of the location provider occured.{Environment.NewLine}Please try again later.";
           return returnValue;
         }
 
         reader = new StreamReader(response.GetResponseStream());
-        if(reader.EndOfStream || reader.ReadLine() != "success")
+        if (reader.EndOfStream || reader.ReadLine() != "success")
         {
           Main.WriteLogMessage("A server side error occured.", DebugConsole.LogType.Error);
           returnValue.Success = false;
-          returnValue.Errortext = string.Format("An error on the server side of the location provider occured.{0}Please try again later.", Environment.NewLine);
+          returnValue.Errortext =
+            $"An error on the server side of the location provider occured.{Environment.NewLine}Please try again later.";
           return returnValue;
         }
 
         latitude = reader.ReadLine();
         longitude = reader.ReadLine();
       }
-      catch(WebException)
+      catch (WebException)
       {
         Main.WriteLogMessage("A server side error occured.", DebugConsole.LogType.Error);
         returnValue.Success = false;
-        returnValue.Errortext = string.Format("An error on the server side of the location provider occured.{0}Please try again later.", Environment.NewLine);
+        returnValue.Errortext =
+          $"An error on the server side of the location provider occured.{Environment.NewLine}Please try again later.";
         return returnValue;
       }
       finally
       {
-        if(response != null)
-        {
-          response.Close();
-        }
-        if(reader != null)
-        {
-          reader.Close();
-        }
+        response?.Close();
+        reader?.Close();
       }
 
       Main.WriteLogMessage("Location detected", DebugConsole.LogType.Info);
@@ -148,19 +141,19 @@ namespace redshift_tray
       return returnValue;
     }
 
-    public static bool isOutOfBounds(double x, double y)
+    public static bool IsOutOfBounds(double x, double y)
     {
-      if(x <= SystemParameters.VirtualScreenLeft) return true;
-      if(y <= SystemParameters.VirtualScreenTop) return true;
-      if(x >= SystemParameters.VirtualScreenLeft + SystemParameters.VirtualScreenWidth) return true;
-      if(y >= SystemParameters.VirtualScreenTop + SystemParameters.VirtualScreenHeight) return true;
+      if (x <= SystemParameters.VirtualScreenLeft) return true;
+      if (y <= SystemParameters.VirtualScreenTop) return true;
+      if (x >= SystemParameters.VirtualScreenLeft + SystemParameters.VirtualScreenWidth) return true;
+      if (y >= SystemParameters.VirtualScreenTop + SystemParameters.VirtualScreenHeight) return true;
       return false;
     }
 
     public static bool WindowExistsFocus<T>(out T windowInstance) where T : Window
     {
       bool returnValue;
-      if(returnValue = WindowExists<T>(out windowInstance))
+      if (returnValue = WindowExists<T>(out windowInstance))
       {
         windowInstance.Focus();
       }

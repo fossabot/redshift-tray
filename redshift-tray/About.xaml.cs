@@ -12,20 +12,8 @@
    Copyright (c) Michael Scholz <development@mischolz.de>
 */
 using redshift_tray.Properties;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace redshift_tray
 {
@@ -34,7 +22,7 @@ namespace redshift_tray
 
     private string VersionText
     {
-      set { Version.Text = string.Format("Version: {0}", value); }
+      set { Version.Text = $"Version: {value}"; }
     }
 
     public About()
@@ -48,8 +36,8 @@ namespace redshift_tray
     {
       Settings settings = Settings.Default;
 
-      settings.AboutLeft = this.Left;
-      settings.AboutTop = this.Top;
+      settings.AboutLeft = Left;
+      settings.AboutTop = Top;
 
       settings.Save();
     }
@@ -58,14 +46,14 @@ namespace redshift_tray
     {
       Settings settings = Settings.Default;
 
-      if(Common.isOutOfBounds(settings.AboutLeft, settings.AboutTop))
+      if(Common.IsOutOfBounds(settings.AboutLeft, settings.AboutTop))
       {
         return;
       }
 
-      this.WindowStartupLocation = WindowStartupLocation.Manual;
-      this.Left = settings.AboutLeft;
-      this.Top = settings.AboutTop;
+      WindowStartupLocation = WindowStartupLocation.Manual;
+      Left = settings.AboutLeft;
+      Top = settings.AboutTop;
     }
 
     private void RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)

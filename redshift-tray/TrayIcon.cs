@@ -14,8 +14,6 @@
 using Hardcodet.Wpf.TaskbarNotification;
 using System.Windows.Controls;
 using System.Windows;
-using System;
-using System.Windows.Input;
 
 namespace redshift_tray
 {
@@ -24,42 +22,30 @@ namespace redshift_tray
 
     private static TrayIcon TrayIconInstance;
 
-    private TaskbarIcon TaskbarIconInstance;
+    private readonly TaskbarIcon TaskbarIconInstance;
 
     public event RoutedEventHandler OnTrayIconLeftClick;
     private void TrayIconLeftClick(RoutedEventArgs e)
     {
-      if(OnTrayIconLeftClick != null)
-      {
-        OnTrayIconLeftClick(this, e);
-      }
+      OnTrayIconLeftClick?.Invoke(this, e);
     }
 
     public event RoutedEventHandler OnMenuItemExitClicked;
     private void MenuItemExitClicked(RoutedEventArgs e)
     {
-      if(OnMenuItemExitClicked != null)
-      {
-        OnMenuItemExitClicked(this, e);
-      }
+      OnMenuItemExitClicked?.Invoke(this, e);
     }
 
     public event RoutedEventHandler OnMenuItemLogClicked;
     private void MenuItemLogClicked(RoutedEventArgs e)
     {
-      if(OnMenuItemLogClicked != null)
-      {
-        OnMenuItemLogClicked(this, e);
-      }
+      OnMenuItemLogClicked?.Invoke(this, e);
     }
 
     public event RoutedEventHandler OnMenuItemSettingsClicked;
     private void MenuItemSettingsClicked(RoutedEventArgs e)
     {
-      if(OnMenuItemSettingsClicked != null)
-      {
-        OnMenuItemSettingsClicked(this, e);
-      }
+      OnMenuItemSettingsClicked?.Invoke(this, e);
     }
 
     public Status TrayStatus
@@ -82,10 +68,7 @@ namespace redshift_tray
 
     private TrayIcon(Status initialStatus)
     {
-      if(TrayIconInstance != null)
-      {
-        TrayIconInstance.TaskbarIconInstance.Dispose();
-      }
+      TrayIconInstance?.TaskbarIconInstance.Dispose();
 
       TaskbarIconInstance = new TaskbarIcon();
       TrayStatus = initialStatus;
@@ -113,25 +96,21 @@ namespace redshift_tray
     {
       ContextMenu contextMenu = new ContextMenu();
 
-      MenuItem menuItemSettings = new MenuItem();
-      menuItemSettings.Header = "Settings";
+      MenuItem menuItemSettings = new MenuItem {Header = "Settings"};
       menuItemSettings.Click += menuItemSettings_Click;
       contextMenu.Items.Add(menuItemSettings);
 
-      MenuItem menuItemLog = new MenuItem();
-      menuItemLog.Header = "Show log";
+      MenuItem menuItemLog = new MenuItem {Header = "Show log"};
       menuItemLog.Click += menuItemLog_Click;
       contextMenu.Items.Add(menuItemLog);
 
-      MenuItem menuItemAbout = new MenuItem();
-      menuItemAbout.Header = "About";
+      MenuItem menuItemAbout = new MenuItem {Header = "About"};
       menuItemAbout.Click += menuItemAbout_Click;
       contextMenu.Items.Add(menuItemAbout);
 
       contextMenu.Items.Add(new Separator());
 
-      MenuItem menuItemExit = new MenuItem();
-      menuItemExit.Header = "Exit";
+      MenuItem menuItemExit = new MenuItem {Header = "Exit"};
       menuItemExit.Click += menuItemExit_Click;
       contextMenu.Items.Add(menuItemExit);
 

@@ -34,14 +34,14 @@ namespace redshift_tray
     private TrayIcon TrayIconInstance;
     private string RedshiftPath;
     private Settings Settings;
-    private bool DummyMethod;
+    private readonly bool DummyMethod;
 
     private Status ProgramStatus
     {
       get { return _ProgramStatus; }
       set
       {
-        switch(value)
+        switch (value)
         {
           case Status.Automatic:
             WriteLogMessage("Switching to automatic mode.", DebugConsole.LogType.Info);
@@ -52,7 +52,7 @@ namespace redshift_tray
             StopRedshift();
             break;
         }
-        if(TrayIconInstance != null)
+        if (TrayIconInstance != null)
         {
           TrayIconInstance.TrayStatus = value;
         }
@@ -74,7 +74,7 @@ namespace redshift_tray
     public bool Initialize()
     {
       LoadSettings();
-      if(!CheckSettings())
+      if (!CheckSettings())
       {
         return false;
       }
@@ -96,20 +96,15 @@ namespace redshift_tray
     {
       Redshift.ExecutableError exeError = Redshift.CheckExecutable(RedshiftPath);
 
-      if(exeError != Redshift.ExecutableError.Ok)
-      {
-        SettingsWindow settingsWindow;
-        if(!Common.WindowExistsFocus(out settingsWindow))
-        {
-          settingsWindow = new SettingsWindow();
-          if((bool)settingsWindow.ShowDialog())
-          {
-            LoadSettings();
-            return true;
-          }
-          return false;
-        }
-      }
+      if (exeError == Redshift.ExecutableError.Ok) return true;
+
+      SettingsWindow settingsWindow;
+      if (Common.WindowExistsFocus(out settingsWindow)) return true;
+
+      settingsWindow = new SettingsWindow();
+      if (!(bool)settingsWindow.ShowDialog()) return false;
+
+      LoadSettings();
       return true;
     }
 
@@ -121,7 +116,7 @@ namespace redshift_tray
 
     private bool StopRedshift()
     {
-      if(RedshiftInstance != null && RedshiftInstance.isRunning)
+      if (RedshiftInstance != null && RedshiftInstance.isRunning)
       {
         RedshiftInstance.Stop();
         ResetScreen();
@@ -132,7 +127,7 @@ namespace redshift_tray
 
     private void ResetScreen()
     {
-      string[] args = { string.Format("-m {0}", DummyMethod ? Redshift.METHOD_DUMMY : Redshift.METHOD_WINGDI), "-x" };
+      string[] args = {$"-m {(DummyMethod ? Redshift.METHOD_DUMMY : Redshift.METHOD_WINGDI)}", "-x" };
       Redshift.StartAndWaitForOutput(RedshiftPath, args);
     }
 
@@ -142,7 +137,7 @@ namespace redshift_tray
 
       TrayIconInstance.OnTrayIconLeftClick += (sender, e) =>
       {
-        switch(ProgramStatus)
+        switch (ProgramStatus)
         {
           case Status.Automatic:
             ProgramStatus = Status.Off;
@@ -167,13 +162,13 @@ namespace redshift_tray
       TrayIconInstance.OnMenuItemSettingsClicked += (sender, e) =>
         {
           SettingsWindow settingsWindow;
-          if(!Common.WindowExistsFocus(out settingsWindow))
+          if (!Common.WindowExistsFocus(out settingsWindow))
           {
             settingsWindow = new SettingsWindow();
-            if((bool)settingsWindow.ShowDialog())
+            if ((bool)settingsWindow.ShowDialog())
             {
               LoadSettings();
-              if(ProgramStatus == Status.Automatic)
+              if (ProgramStatus == Status.Automatic)
               {
                 StartRedshiftAutomatic();
               }
@@ -184,17 +179,17 @@ namespace redshift_tray
 
     private void RedshiftInstance_OnRedshiftQuit(object sender, RedshiftQuitArgs e)
     {
-      if(!e.ManualKill)
+      if (!e.ManualKill)
       {
         Application.Current.Dispatcher.Invoke(() =>
         {
           MessageBox.Show(string.Format("Redshift crashed with the following output:{0}{0}{1}", Environment.NewLine, e.ErrorOutput), "Redshift Tray", MessageBoxButton.OK, MessageBoxImage.Error);
 
           SettingsWindow settingsWindow;
-          if(!Common.WindowExistsFocus(out settingsWindow))
+          if (!Common.WindowExistsFocus(out settingsWindow))
           {
             settingsWindow = new SettingsWindow();
-            if((bool)settingsWindow.ShowDialog())
+            if ((bool)settingsWindow.ShowDialog())
             {
               LoadSettings();
               StartRedshiftAutomatic();
