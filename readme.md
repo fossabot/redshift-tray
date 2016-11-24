@@ -15,4 +15,4 @@ Redshift Tray is a convenient tool for configuring and using [Redshift](http://j
 
 **How to build**
 
-Use Microsoft Visual Studio 2013 or above to load the project. You should be able to compile the sources without additional dependencies.
+Use Microsoft Visual Studio 2015 or above to load the project. You should be able to compile the sources without additional dependencies.
